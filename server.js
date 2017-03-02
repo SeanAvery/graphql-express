@@ -15,8 +15,14 @@ var schema = buildSchema(`
     rollThreeDice: [Int]
     rollDice(numDice: Int!, numSides: Int): [Int]
     getDie(numSides: Int): RandomDie
+    getMessage: String
   }
+  type Mutation {
+    setMessage(message: String): String
+  }
+
 `);
+
 
 class RandomDie {
   constructor(numSides) {
@@ -36,6 +42,7 @@ class RandomDie {
   }
 }
 
+var fakeDatabase = {};
 // The root provides a clear resolver function for each API endpoint
 var root = {
   quoteOfTheDay: () => {
@@ -56,7 +63,15 @@ var root = {
   },
   getDie: ({numSides}) => {
     return new RandomDie(numSides || 6);
+  },
+  setMessage: ({message}) => {
+    fakeDatabase.message = message;
+    return message;
+  },
+  getMessage: () => {
+    return fakeDatabase.message;
   }
+
 }
 
 var app = express();
