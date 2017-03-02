@@ -4,13 +4,37 @@ var { buildSchema } = require('graphql');
 
 // Construct a schema, using GraphQ: schema language
 var schema = buildSchema(`
+  type RandomDie {
+    numSides: Int!
+    rollOnce: Int!
+    roll(numRolls: Int!): [Int]
+  }
   type Query {
-    quoteOfTheDay: String,
-    random: Float!,
-    rollThreeDice: [Int],
+    quoteOfTheDay: String
+    random: Float!
+    rollThreeDice: [Int]
     rollDice(numDice: Int!, numSides: Int): [Int]
+    getDie(numSides: Int): RandomDie
   }
 `);
+
+class RandomDie {
+  constructor(numSides) {
+    this.numSides = numSides;
+  }
+
+  rollOnce() {
+    return 1 + Math.floor(Math.random() * this.numSides);
+  }
+
+  roll({numRolls}) {
+    var output = [];
+    for (var i = 0; i < numRolls; i++) {
+      output.push(this.rollOnce());
+    }
+    return output;
+  }
+}
 
 // The root provides a clear resolver function for each API endpoint
 var root = {
@@ -29,6 +53,9 @@ var root = {
       output.push(1 + Math.floor(Math.random() * (numSides || 6)));
     }
     return output;
+  },
+  getDie: ({numSides}) => {
+    return new RandomDie(numSides || 6);
   }
 }
 
